@@ -22,8 +22,8 @@ int main(int argc, char **argv)
   bool status;
 
   tough_perception::MultisenseImage imageHandler(nh);
- 
-  cv::Mat image, gray, blur, edges, abs_edges;
+
+  cv::Mat image, blueMask, redMask, greenMask;
   status = imageHandler.giveImage(image);
     
   ROS_INFO_STREAM("[Height]" << imageHandler.giveHeight() << " [width]" <<imageHandler.giveWidth());
@@ -32,15 +32,24 @@ int main(int argc, char **argv)
   if(status) {
     showImage(image,"RGB Image");
 
-    cv::cvtColor( image, gray, cv::COLOR_BGR2GRAY ); // Convert image to grayscale
-    showImage( gray, "Grayscale Image");
+    // RGB values indicating a range of blues that we want to detect
+    cv::inRange(image, cv::Scalar(0, 0, 200), cv::Scalar(20, 20, 255), blueMask);
+    showImage(blueMask, "Blue-filtered Image");
 
-    cv::GaussianBlur( gray, blur, cv::Size(3, 3), 0, 0, cv::BORDER_DEFAULT ); // Blur
-    showImage( blur, "Blurred Image");
+    // RGB values indicating a range of reds that we want to detect
+    cv::inRange(image, cv::Scalar(200, 0, 0), cv::Scalar(225, 20, 20), redMask);
+    showImage(redMask, "Red-filtered Image");
 
-    cv::Laplacian( blur, edges, CV_16S, 3, 1, 0, cv::BORDER_DEFAULT ); // Compute Laplacian
-    cv::convertScaleAbs( edges, abs_edges );
-    showImage( abs_edges, "Edges");
+    // RGB values indicating a range of greens that we want to detect
+    cv::inRange(image, cv::Scalar(0, 200, 0), cv::Scalar(20, 225, 20), greenMask);
+    showImage(greenMask, "Green-filtered Image");
+
+    // cv::GaussianBlur( gray, blur, cv::Size(3, 3), 0, 0, cv::BORDER_DEFAULT ); // Blur
+    // showImage( blur, "Blurred Image");
+
+    // cv::Laplacian( blur, edges, CV_16S, 3, 1, 0, cv::BORDER_DEFAULT ); // Compute Laplacian
+    // cv::convertScaleAbs( edges, abs_edges );
+    // showImage( abs_edges, "Edges");
   }
 
   return 0;
