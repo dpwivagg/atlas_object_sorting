@@ -23,7 +23,9 @@ int main(int argc, char **argv)
 
   tough_perception::MultisenseImage imageHandler(nh);
 
-  cv::Mat image, blueMask, redMask, greenMask;
+  cv::Mat image, blueMask, redMask, greenMask, 
+          blueGreyscale, redGreyscale, greenGreyscale,
+          blueBinary, redBinary, greenBinary;
   status = imageHandler.giveImage(image);
     
   ROS_INFO_STREAM("[Height]" << imageHandler.giveHeight() << " [width]" <<imageHandler.giveWidth());
@@ -44,15 +46,28 @@ int main(int argc, char **argv)
     cv::inRange(image, cv::Scalar(0, 200, 0), cv::Scalar(20, 225, 20), greenMask);
     showImage(greenMask, "Green-filtered Image");
 
-    // TODO: Find the centroids of RGB objects, then use LIDAR or stereo to detect depth for determining
-    // 3D location for walking target
+    // Convert the images to grayscale and binarize
 
-    // cv::GaussianBlur( gray, blur, cv::Size(3, 3), 0, 0, cv::BORDER_DEFAULT ); // Blur
-    // showImage( blur, "Blurred Image");
+    cv::cvtColor(blueMask, blueGreyscale, CV_RGB2GRAY);
+    cv::cvtColor(redMask, redGreyscale, CV_RGB2GRAY);
+    cv::cvtColor(greenMask, greenGreyscale, CV_RGB2GRAY);
 
-    // cv::Laplacian( blur, edges, CV_16S, 3, 1, 0, cv::BORDER_DEFAULT ); // Compute Laplacian
-    // cv::convertScaleAbs( edges, abs_edges );
-    // showImage( abs_edges, "Edges");
+    blueBinary = blueGreyscale > 128;
+    redBinary = redGreyscale > 128;
+    greenBinary = greenGreyscale > 128;
+
+    // Compute centroids of each color object -- this will not work if multiple objects of the same color are visible
+    // In that case we can find contours of each object and compute the centroids respectively
+    // Use https://www.learnopencv.com/find-center-of-blob-centroid-using-opencv-cpp-python/
+
+    cv::Moments blueMoments = moments(blueBinary, true);
+    cv::Point p(blueMoments.m10/blueMoments.m00, blueMoments.m01/blueMoments.m00);
+
+    // Plot a red circle on the blue centroid for visualization purposes
+    circle(blueGreyscale, p, 1, CV_RGB(255,0,0), 3);
+    showImage(blueGreyscale, "Green-filtered Image");
+
+    // TODO: Use LIDAR or stereo to detect depth for determining 3D location for walking target
   }
 
   return 0;
