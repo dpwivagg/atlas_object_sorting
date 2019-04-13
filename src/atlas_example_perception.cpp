@@ -44,6 +44,9 @@ int main(int argc, char **argv)
     cv::inRange(image, cv::Scalar(0, 200, 0), cv::Scalar(20, 225, 20), greenMask);
     showImage(greenMask, "Green-filtered Image");
 
+    // TODO: Find the centroids of RGB objects, then use LIDAR or stereo to detect depth for determining
+    // 3D location for walking target
+
     // cv::GaussianBlur( gray, blur, cv::Size(3, 3), 0, 0, cv::BORDER_DEFAULT ); // Blur
     // showImage( blur, "Blurred Image");
 
