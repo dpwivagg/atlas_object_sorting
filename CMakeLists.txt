@@ -22,8 +22,6 @@ add_executable(${PROJECT_NAME}_perception src/atlas_object_sorting_perception.cp
 
 set_target_properties(${PROJECT_NAME}_perception PROPERTIES OUTPUT_NAME perception PREFIX "")
 
-# add_dependencies(atlas_example_perception_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
 target_link_libraries(${PROJECT_NAME}_talker ${catkin_LIBRARIES})
 target_link_libraries(${PROJECT_NAME}_perception ${catkin_LIBRARIES})
 
