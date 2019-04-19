@@ -70,7 +70,8 @@ int main(int argc, char **argv) {
     ROS_INFO_STREAM("Organized cloud size: " << organized_cloud->size());
     pcl::PCLPointCloud2 output;
     pcl::toPCLPointCloud2(*organized_cloud, output);
-    output.header.frame_id = std::string("world");
+    const std::string leftOptFrame = "left_camera_optical_frame";
+    output.header.frame_id = std::string(leftOptFrame);
     output.header.stamp = ros::Time::now().toNSec();
     debug_publisher.publish(output);
 
