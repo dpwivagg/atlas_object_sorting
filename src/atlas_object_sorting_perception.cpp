@@ -7,6 +7,8 @@
 #include <opencv2/core.hpp>
 #include <opencv/highgui.h>
 #include <pcl/point_types.h>
+#include <pcl_ros/transforms.h>
+#include "sensor_msgs/PointCloud2.h"
 
 void showImage(cv::Mat &image,std::string name) {
   cv::namedWindow(name,cv::WINDOW_AUTOSIZE);
@@ -29,6 +31,7 @@ int main(int argc, char **argv) {
   spinner.start();
 
   ros::Publisher pcPub = nh.advertise<sensor_msgs::PointCloud2>("stereoPointCloud", 1000);
+  ros::Publisher debug_publisher = nh.advertise<pcl::PCLPointCloud2>("/debug/RGBDTest", 1);
 
   bool status, pcStatus;
 
@@ -47,7 +50,6 @@ int main(int argc, char **argv) {
   bool new_color = false;
   bool new_disp = false;
 
-  ros::Publisher debug_publisher = nh.advertise<pcl::PCLPointCloud2>("/debug/RGBD", 1);
 
   tough_perception::StereoPointCloudColor::Ptr organized_cloud(new tough_perception::StereoPointCloudColor);
 
@@ -68,13 +70,16 @@ int main(int argc, char **argv) {
     tough_perception::generateOrganizedRGBDCloud(disp, color, cam_model.Q, organized_cloud);
     std::cout << "Post point cloud organizing" << std::endl;
     ROS_INFO_STREAM("Organized cloud size: " << organized_cloud->size());
+    
     pcl::PCLPointCloud2 output;
     pcl::toPCLPointCloud2(*organized_cloud, output);
+    sensor_msgs::PointCloud2 outputRos;
+    pcl::toROSMsg(*organized_cloud, outputRos);
     const std::string leftOptFrame = "left_camera_optical_frame";
-    output.header.frame_id = std::string(leftOptFrame);
-    output.header.stamp = ros::Time::now().toNSec();
-    debug_publisher.publish(output);
-
+    outputRos.header.frame_id = leftOptFrame;
+    outputRos.header.stamp = ros::Time::now();
+    debug_publisher.publish(outputRos);
+    ROS_INFO("Cloud published to /debug/RGBDTest");
     new_disp = new_color = false;
   }
 
