@@ -19,14 +19,17 @@ include_directories(${catkin_INCLUDE_DIRS})
 
 add_executable(${PROJECT_NAME}_talker src/talker.cpp)
 add_executable(${PROJECT_NAME}_perception src/atlas_object_sorting_perception.cpp)
+add_executable(${PROJECT_NAME}_navigation src/atlas_object_sorting_navigation.cpp)
 
 set_target_properties(${PROJECT_NAME}_perception PROPERTIES OUTPUT_NAME perception PREFIX "")
+set_target_properties(${PROJECT_NAME}_navigation PROPERTIES OUTPUT_NAME navigation PREFIX "")
 
 target_link_libraries(${PROJECT_NAME}_talker ${catkin_LIBRARIES})
 target_link_libraries(${PROJECT_NAME}_perception ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_navigation ${catkin_LIBRARIES})
 
 ## Mark executables and/or libraries for installation
-install(TARGETS ${PROJECT_NAME}_talker ${PROJECT_NAME}_perception
+install(TARGETS ${PROJECT_NAME}_talker ${PROJECT_NAME}_perception ${PROJECT_NAME}_navigation
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
