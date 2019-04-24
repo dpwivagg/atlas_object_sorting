@@ -1,0 +1,11 @@
+<launch>
+
+    <!-- The perception node -->
+    <node name="perception" type="atlas_object_sorting_perception" pkg="atlas_object_sorting" output="screen">
+    </node>
+
+    <!-- The navigation node -->
+    <node name="navigation" type="atlas_object_sorting_navigation" pkg="atlas_object_sorting" output="screen">
+    </node>
+
+</launch>
