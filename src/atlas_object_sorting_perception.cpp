@@ -35,8 +35,11 @@ int main(int argc, char **argv) {
 
   bool status, pcStatus;
 
+  ROS_INFO("Hello, world!");
   tough_perception::MultisenseImageInterfacePtr imageHandler;
   imageHandler = tough_perception::MultisenseImageInterface::getMultisenseImageInterface(nh);
+
+  ROS_INFO("Interface started");
 
   tough_perception::MultisenseCameraModel cam_model;
   imageHandler->getCameraInfo(cam_model);
@@ -50,9 +53,11 @@ int main(int argc, char **argv) {
   bool new_color = false;
   bool new_disp = false;
 
+  ROS_INFO("Grabbing organized point cloud");
 
   tough_perception::StereoPointCloudColor::Ptr organized_cloud(new tough_perception::StereoPointCloudColor);
 
+  ROS_INFO("Point cloud recieved");
   if (imageHandler->getImage(color))
   {
     new_color = true;
@@ -81,7 +86,52 @@ int main(int argc, char **argv) {
     debug_publisher.publish(outputRos);
     ROS_INFO("Cloud published to /debug/RGBDTest");
     new_disp = new_color = false;
+
+    if(!organized_cloud->empty()) {
+      // Generate and fill cv Mats for processing
+      cv::Mat image(organized_cloud->height, organized_cloud->width, CV_8UC4);
+
+      #pragma omp parallel for
+      for(int y = 0; y < image.rows; y++) {
+        for(int x = 0; x < image.cols; x++) {
+          pcl::PointXYZRGB point = organized_cloud->at(x, y);
+          image.at<cv::Vec4b>(y, x)[0] = point.b;
+          image.at<cv::Vec4b>(y, x)[1] = point.g;
+          image.at<cv::Vec4b>(y, x)[2] = point.r;
+          image.at<cv::Vec4b>(y, x)[3] = point.a;
+        }
+      }
+    }
+
+    showImage(image,"BGR Image");
+
+    // Convert the images to binary color threshold images using
+    // BGR values indicating a range of blues, greens, and reds that we want to detect
+
+    cv::inRange(image, cv::Scalar(0, 0, 200), cv::Scalar(50, 50, 255), redMask);
+    showImage(redMask, "Red-filtered Image");
+
+    cv::inRange(image, cv::Scalar(200, 0, 0), cv::Scalar(255, 50, 50), blueMask);
+    showImage(blueMask, "Blue-filtered Image");
+
+    cv::inRange(image, cv::Scalar(0, 200, 0), cv::Scalar(50, 255, 50), greenMask);
+    showImage(greenMask, "Green-filtered Image");
+
+    // Compute centroids of each color object -- this will not work if multiple objects of the same color are visible
+    // In that case we can find contours of each object and compute the centroids respectively
+    // Use https://www.learnopencv.com/find-center-of-blob-centroid-using-opencv-cpp-python/
+
+    cv::Moments blueMoments = moments(blueMask, true);
+
+    cv::Point p(blueMoments.m10/blueMoments.m00, blueMoments.m01/blueMoments.m00);
+
+    // Plot a red circle on the blue centroid for visualization purposes
+    circle(image, p, 1, CV_RGB(255,0,0), 3);
+    showImage(image, "Blue Centroid");
+
   }
+
+  // const geometry_msgs::Pose2D goal
 
   spinner.stop();
 
