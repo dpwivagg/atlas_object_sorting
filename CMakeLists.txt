@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tough_controller_interface
   tough_perception_common
+  tough_footstep
 )
 
 find_package(PCL)
