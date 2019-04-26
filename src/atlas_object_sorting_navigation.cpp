@@ -45,10 +45,6 @@ int main(int argc, char **argv) {
   // Create RobotWalkToGoal object to execute walkToGoal given this node handle
   RobotWalkToGoal atlas(nh);
 
-  If (!atlas(nh)) {
-    ROS_INFO("Could not walk to goal.")
-  }
-
   spinner.stop();
 
   return 0;
