@@ -15,7 +15,7 @@ class RobotWalkToGoal {
 public:
   RobotWalkToGoal(ros::NodeHandle nh):n_(nh) {
     // Subscribe to perception node
-    sub_ = n_.subscribe("atlas_object_sorting_perception", 1000, &RobotWalkToGoal::callback, this);
+    sub_ = n_.subscribe("/walkingGoal", 1000, &RobotWalkToGoal::callback, this);
   }
 
   void callback(const geometry_msgs::Pose2D& goal) {
