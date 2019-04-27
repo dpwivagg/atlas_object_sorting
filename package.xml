@@ -20,6 +20,8 @@
 
   <depend>tough_perception_common</depend>
   <depend>tough_controller_interface</depend>
+  <depend>tough_footstep</depend>
+  <depend>rviz</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

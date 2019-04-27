@@ -1,0 +1,16 @@
+<launch>
+
+    <!-- Launch Gazebo World -->
+    <arg name="world_file" default="$(find atlas_object_sorting)/worlds/my_world.world"/>
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="paused" value="false"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="debug" value="false"/>
+        <arg name="gui" value="true"/>
+    </include>
+
+    <!-- Rviz Configuration -->
+    <node type="rviz" name="rviz" pkg="rviz" args="(find atlas_object_sorting)/rviz/config.rviz"/>
+
+</launch>

@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   tough_controller_interface
   tough_perception_common
   tough_footstep
+  rviz
 )
 
 find_package(PCL)
