@@ -22,6 +22,7 @@
   <depend>tough_controller_interface</depend>
   <depend>tough_footstep</depend>
   <depend>rviz</depend>
+  <depend>tf</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

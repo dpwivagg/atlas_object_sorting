@@ -11,11 +11,12 @@ find_package(catkin REQUIRED COMPONENTS
   tough_perception_common
   tough_footstep
   rviz
+  tf
 )
 
 find_package(PCL)
 
-catkin_package(CATKIN_DEPENDS roscpp rospy tough_controller_interface tough_perception_common)
+catkin_package(CATKIN_DEPENDS roscpp rospy tough_controller_interface tough_perception_common tough_footstep)
 
 include_directories(${catkin_INCLUDE_DIRS})
 

@@ -8,6 +8,8 @@
 #include <opencv/highgui.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/transforms.h>
+#include <tf/transform_listener.h>
+#include <tough_common/tough_common_names.h>
 #include "sensor_msgs/PointCloud2.h"
 #include "geometry_msgs/Pose2D.h"
 #include "geometry_msgs/PoseStamped.h"
@@ -121,13 +123,26 @@ int main(int argc, char **argv) {
     else if(desiredColor == "red") redCentroid.get(point);
     else if(desiredColor == "green") greenCentroid.get(point);
 
-    geometry_msgs::Pose2D goal;
-    goal.x = point.x;
-    goal.y = point.y;
-    goal.theta = 0;
-    pose_pub.publish(goal);    
+    tf::TransformListener tfListener(nh);
+    tf::StampedTransform transform;
+    tf::Vector3 centroidEye, centroidWorld;
+    
+    if(tfListener.waitForTransform(TOUGH_COMMON_NAMES::WORLD_TF, leftOptFrame, ros::Time(0), ros::Duration(5))) {
+      tfListener.lookupTransform(TOUGH_COMMON_NAMES::WORLD_TF, leftOptFrame, ros::Time(0), transform);
+      centroidEye.setValue(point.x, point.y, point.z);
+      centroidWorld = transform * centroidEye;
 
-    ROS_INFO_STREAM("Centroid of points: " << point);
+      geometry_msgs::Pose2D goal;
+      goal.x = centroidWorld.getX();
+      goal.y = centroidWorld.getY();
+      goal.theta = 0;
+      pose_pub.publish(goal);    
+
+      ROS_INFO_STREAM("Centroid of points: " << goal);
+    } else {
+      ROS_ERROR("Could not obtain transform, goal not published.");
+    }
+
   }
   spinner.stop();
   return 0;
