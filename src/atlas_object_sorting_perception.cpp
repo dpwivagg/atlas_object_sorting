@@ -33,9 +33,7 @@ int main(int argc, char **argv) {
 
   ros::Publisher pcPub = nh.advertise<sensor_msgs::PointCloud2>("stereoPointCloud", 1000);
   ros::Publisher debug_publisher = nh.advertise<pcl::PCLPointCloud2>("/debug/RGBDTest", 1);
-  ros::Publisher red_pose_pub = nh.advertise<geometry_msgs::Pose2D>("/colorCentroid/red", 1);
-  ros::Publisher green_pose_pub = nh.advertise<geometry_msgs::Pose2D>("/colorCentroid/green", 1);
-  ros::Publisher blue_pose_pub = nh.advertise<geometry_msgs::Pose2D>("colorCentroid/blue", 1);
+  ros::Publisher pose_pub = nh.advertise<geometry_msgs::Pose2D>("/colorCentroid", 1);
 
   tough_perception::MultisenseImageInterfacePtr imageHandler;
   imageHandler = tough_perception::MultisenseImageInterface::getMultisenseImageInterface(nh);
@@ -76,6 +74,16 @@ int main(int argc, char **argv) {
     const std::string leftOptFrame = "left_camera_optical_frame";
     new_disp = new_color = false;
 
+
+    pcl::PCLPointCloud2 output;
+    pcl::toPCLPointCloud2(*organized_cloud, output);
+    sensor_msgs::PointCloud2 outputRos;
+    pcl::toROSMsg(*organized_cloud, outputRos);
+    outputRos.header.frame_id = leftOptFrame;
+    outputRos.header.stamp = ros::Time::now();
+    debug_publisher.publish(outputRos);
+    ROS_INFO("Cloud published to /debug/RGBDTest");
+
     ROS_INFO("Computing color-based centroids");
 
     pcl::ConstCloudIterator<PointT> pointIter(*organized_cloud);
@@ -107,7 +115,7 @@ int main(int argc, char **argv) {
     goal.x = point.x;
     goal.y = point.y;
     goal.theta = 0;
-    blue_pose_pub.publish(goal);    
+    pose_pub.publish(goal);    
 
     ROS_INFO_STREAM("Centroid of points: " << point);
   }
