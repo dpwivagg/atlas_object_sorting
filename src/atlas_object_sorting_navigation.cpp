@@ -15,12 +15,12 @@ class RobotWalkToGoal {
 public:
   RobotWalkToGoal(ros::NodeHandle nh):n_(nh) {
     // Subscribe to perception node
-    sub_ = n_.subscribe("/walkingGoal", 1000, &RobotWalkToGoal::callback, this);
+    sub_ = n_.subscribe("/colorCentroid", 1000, &RobotWalkToGoal::callback, this);
   }
 
   void callback(const geometry_msgs::Pose2D& goal) {
     // Create RobotWalker object
-    RobotWalker walk(n_, 0.4, 0.4, 0);
+    RobotWalker walk(n_, goal.x, goal.y, goal.theta);
     // Output message
     std::string msg = "Walking to x: " + std::to_string(goal.x) + ", y: " + std::to_string(goal.y) +
                       ", theta: " + std::to_string(goal.theta);
@@ -39,13 +39,16 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "atlas_object_sorting_navigation"); // Initialize ROS node
   ros::NodeHandle nh;
 
-  ros::AsyncSpinner spinner(2);
-  spinner.start();
 
   // Create RobotWalkToGoal object to execute walkToGoal given this node handle
   RobotWalkToGoal atlas(nh);
 
-  spinner.stop();
+  ros::Rate loop_rate(10); // 2 seconds
+
+  while(ros::ok()) {
+    ros::spinOnce();
+    loop_rate.sleep();
+  }
 
   return 0;
 }
