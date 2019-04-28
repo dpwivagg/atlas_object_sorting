@@ -14,6 +14,16 @@
 
 typedef pcl::PointXYZRGB PointT;
 
+void show_image(cv::Mat& image, std::string name)
+{
+  cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
+  cv::imshow(name, image);
+  ROS_INFO("Press any key to continue");
+  cv::waitKey(0);
+  cv::destroyWindow(name);
+  ros::Duration(0.5).sleep();  // wait some time for the window to destroy cleanly.
+}
+
 int main(int argc, char **argv) {
   ros::init(argc, argv, "atlas_object_sorting_perception"); // Initialize ROS node named test_multisense_image
   ros::NodeHandle nh; // Create node handle so that all libraries are in the same node
@@ -22,21 +32,28 @@ int main(int argc, char **argv) {
   spinner.start();
 
   ros::Publisher pcPub = nh.advertise<sensor_msgs::PointCloud2>("stereoPointCloud", 1000);
-  ros::Publisher debug_publisher = nh.advertise<pcl::PCLPointCloud2>("/debug/RGBD", 1);
-  ros::Publisher pose_pub = nh.advertise<geometry_msgs::Pose2D>("walkingGoal", 1);
-  ros::Publisher pose_pub_rviz = nh.advertise<geometry_msgs::PoseStamped>("walkingGoalRviz", 1);
+  ros::Publisher debug_publisher = nh.advertise<pcl::PCLPointCloud2>("/debug/RGBDTest", 1);
+  ros::Publisher red_pose_pub = nh.advertise<geometry_msgs::Pose2D>("/colorCentroid/red", 1);
+  ros::Publisher green_pose_pub = nh.advertise<geometry_msgs::Pose2D>("/colorCentroid/green", 1);
+  ros::Publisher blue_pose_pub = nh.advertise<geometry_msgs::Pose2D>("colorCentroid/blue", 1);
 
   tough_perception::MultisenseImageInterfacePtr imageHandler;
   imageHandler = tough_perception::MultisenseImageInterface::getMultisenseImageInterface(nh);
+  imageHandler->setSpindleSpeed(2.0);
+
+  ROS_INFO("Multisense image handler initialized");
 
   tough_perception::MultisenseCameraModel cam_model;
   imageHandler->getCameraInfo(cam_model);
-  
+
+  ROS_INFO("Camera model parameters obtained");
+
   cv::Mat color;
   cv::Mat_<float> disp;
 
   bool new_color = false;
   bool new_disp = false;
+
 
   tough_perception::StereoPointCloudColor::Ptr organized_cloud(new tough_perception::StereoPointCloudColor);
 
@@ -81,6 +98,7 @@ int main(int argc, char **argv) {
       } else if(g > b && g > r) {
         greenCentroid.add(*pointIter);
       }
+      
     }
 
     blueCentroid.get(point);
@@ -89,11 +107,10 @@ int main(int argc, char **argv) {
     goal.x = point.x;
     goal.y = point.y;
     goal.theta = 0;
-    pose_pub.publish(goal);    
+    blue_pose_pub.publish(goal);    
 
     ROS_INFO_STREAM("Centroid of points: " << point);
-
-    spinner.stop();
-    return 0;
-}
+  }
+  spinner.stop();
+  return 0;
 }
