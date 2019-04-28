@@ -26,7 +26,15 @@ void show_image(cv::Mat& image, std::string name)
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "atlas_object_sorting_perception"); // Initialize ROS node named test_multisense_image
-  ros::NodeHandle nh; // Create node handle so that all libraries are in the same node
+  ros::NodeHandle nh("~"); // Create node handle so that all libraries are in the same node
+
+  std::string desiredColor;
+  nh.getParam("color", desiredColor);
+
+  if(desiredColor != "green" && desiredColor != "red" && desiredColor != "blue") {
+    ROS_ERROR_STREAM("Invalid color input: " << desiredColor);
+    return 1;
+  }
 
   ros::AsyncSpinner spinner(2);
   spinner.start();
@@ -109,7 +117,9 @@ int main(int argc, char **argv) {
       
     }
 
-    blueCentroid.get(point);
+    if(desiredColor == "blue") blueCentroid.get(point);
+    else if(desiredColor == "red") redCentroid.get(point);
+    else if(desiredColor == "green") greenCentroid.get(point);
 
     geometry_msgs::Pose2D goal;
     goal.x = point.x;

@@ -45,6 +45,8 @@ int main(int argc, char **argv) {
 
   ros::Rate loop_rate(10); // 2 seconds
 
+  ROS_INFO("Waiting for walking goal message on /colorCentroid");
+
   while(ros::ok()) {
     ros::spinOnce();
     loop_rate.sleep();
