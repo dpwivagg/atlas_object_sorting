@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
       centroidWorld = transform * centroidEye;
 
       geometry_msgs::Pose2D goal;
-      goal.x = centroidWorld.getX();
+      goal.x = centroidWorld.getX() - 1.0;
       goal.y = centroidWorld.getY();
       goal.theta = 0;
       pose_pub.publish(goal);    
